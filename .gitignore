@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 # ignore
+.DS_Store
 *.pt
 output/
 runs/
