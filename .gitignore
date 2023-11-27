@@ -165,3 +165,4 @@ output/
 run/
 models/
 ultralytics_results_with_sahi/
+.mp4
