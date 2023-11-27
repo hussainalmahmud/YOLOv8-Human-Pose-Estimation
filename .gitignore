@@ -163,7 +163,7 @@ cython_debug/
 .DS_Store
 *.pt
 output/
-runs/
+runs*/
 models/
 ultralytics_results_with_sahi/
 DS_Prob_01/
