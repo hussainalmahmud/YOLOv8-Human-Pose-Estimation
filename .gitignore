@@ -166,4 +166,5 @@ output/
 runs/
 models/
 ultralytics_results_with_sahi/
+DS_Prob_01/
 *.mp4
