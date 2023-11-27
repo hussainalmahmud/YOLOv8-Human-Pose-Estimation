@@ -162,7 +162,7 @@ cython_debug/
 # ignore
 *.pt
 output/
-run/
+runs/
 models/
 ultralytics_results_with_sahi/
-.mp4
+*.mp4
