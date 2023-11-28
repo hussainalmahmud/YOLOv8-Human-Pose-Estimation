@@ -35,10 +35,11 @@ def pose_estimation(model, source, view_img=False, save_img=False, exist_ok=Fals
             # Object detection and tracking
             results = model.track(frame, 
                                 save=True, 
-                                # conf=0.25, 
+                                conf=0.5, 
                                 iou=0.7, 
                                 persist=True,
                                 device='cpu',
+                                
                                 )
 
             img_annotated = results[0].plot(boxes=True)
