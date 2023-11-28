@@ -162,9 +162,11 @@ cython_debug/
 # ignore
 .DS_Store
 *.pt
-output/
+output*/
 runs*/
 models/
 ultralytics_results_with_sahi/
 DS_Prob_01/
 *.mp4
+FalsePositive/
+Blinking/
