@@ -171,3 +171,5 @@ DS_Prob_01/
 FalsePositive/
 Blinking/
 old_code/
+*.png
+*.csv
