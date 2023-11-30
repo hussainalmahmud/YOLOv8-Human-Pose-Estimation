@@ -30,7 +30,6 @@ def validate(model_file, weights, dataset):
 
     # with open("validate_results.csv", mode="w", newline="") as file:
     with open("validate_results.csv", mode="w", newline="", encoding="utf-8") as file:
-
         writer = csv.writer(file)
         writer.writerow(
             [

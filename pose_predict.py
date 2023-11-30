@@ -37,15 +37,15 @@ def pose_estimation(
 
             if success:
                 results = model.track(
-                    frame,  
-                    conf= 0.5,
-                    iou= 0.7,
-                    device= "cpu",
-                    imgsz= 640,
-                    tracker= "bytetrack.yaml",
-                    persist= True,  # set persist to True for tracking in video (Re-Identification)
-                    retina_masks= True,
-                    augment= True,
+                    frame,
+                    conf=0.5,
+                    iou=0.7,
+                    device="cpu",
+                    imgsz=640,
+                    tracker="bytetrack.yaml",
+                    persist=True,  # set persist to True for tracking in video (Re-Identification)
+                    retina_masks=True,
+                    augment=True,
                 )
 
                 img_annotated = results[0].plot(boxes=True)
@@ -98,13 +98,13 @@ def pose_estimation(
 
         results = model.predict(
             image,
-            conf= 0.5,
-            iou= 0.7,
-            device= "cpu",
-            imgsz= 640,
-            tracker= "bytetrack.yaml",
-            retina_masks= True,
-            augment= True,
+            conf=0.5,
+            iou=0.7,
+            device="cpu",
+            imgsz=640,
+            tracker="bytetrack.yaml",
+            retina_masks=True,
+            augment=True,
         )
 
         img_annotated = results[0].plot(boxes=True)
@@ -135,14 +135,14 @@ def process_folder(model_path, folder_path, save_img=False, exist_ok=False):
 
 
 def parse_opt():
-    """ 
+    """
     Parse command line arguments.
 
     Example use:
     python pose_predict.py --model yolov8l-pose.pt --source 0 --is_video --view-img # webcam
     python pose_predict.py --model yolov8l-pose.pt --source video.mp4 --is_video --save-img --view-img
     python pose_predict.py --model yolov8l-pose.pt --source img_name.jpg --save-img --view-img
-    python pose_predict.py --model yolov8l-pose.pt --source folder_name --save-img 
+    python pose_predict.py --model yolov8l-pose.pt --source folder_name --save-img
 
     """
     parser = argparse.ArgumentParser()
@@ -168,7 +168,10 @@ def parse_opt():
 def main(local_opt):
     if os.path.isdir(local_opt.source):  # if folder
         process_folder(
-            local_opt.model, local_opt.source, save_img=local_opt.save_img, exist_ok=local_opt.exist_ok
+            local_opt.model,
+            local_opt.source,
+            save_img=local_opt.save_img,
+            exist_ok=local_opt.exist_ok,
         )
     elif local_opt.source == "0":  # if webcam
         model = YOLO(local_opt.model)
@@ -181,7 +184,11 @@ def main(local_opt):
             exist_ok=local_opt.exist_ok,
         )
     elif os.path.isfile(local_opt.source):  # if file
-        model = YOLO(local_opt.model) if isinstance(local_opt.model, str) else local_opt.model
+        model = (
+            YOLO(local_opt.model)
+            if isinstance(local_opt.model, str)
+            else local_opt.model
+        )
         pose_estimation(
             model,
             local_opt.source,

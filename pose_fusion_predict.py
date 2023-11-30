@@ -16,10 +16,9 @@ def pose_estimation(
     save_img=False,
     exist_ok=False,
 ):
-
     if source != 0 and not Path(str(source)).exists():
         raise FileNotFoundError(f"Source path '{source}' does not exist.")
-        
+
     if is_video or source == 0:
         # Video setup
         cap = cv2.VideoCapture(source)
@@ -46,24 +45,24 @@ def pose_estimation(
 
             if success:
                 pose_results = pose_model.track(
-                    frame, 
-                    conf= 0.5,
-                    iou= 0.7,
-                    device= "cpu",
-                    imgsz= 640,
-                    tracker= "bytetrack.yaml",
-                    persist= True,  # set persist to True for tracking in video (Re-Identification)
-                    retina_masks= True,
+                    frame,
+                    conf=0.5,
+                    iou=0.7,
+                    device="cpu",
+                    imgsz=640,
+                    tracker="bytetrack.yaml",
+                    persist=True,  # set persist to True for tracking in video (Re-Identification)
+                    retina_masks=True,
                 )
                 seg_results = seg_model.track(
                     frame,
-                    conf= 0.25,
-                    iou= 0.7,
-                    device= "cpu",
-                    imgsz= 640,
-                    tracker= "bytetrack.yaml",
-                    persist= True,  # set persist to True for tracking in video (Re-Identification)
-                    classes= [0],
+                    conf=0.25,
+                    iou=0.7,
+                    device="cpu",
+                    imgsz=640,
+                    tracker="bytetrack.yaml",
+                    persist=True,  # set persist to True for tracking in video (Re-Identification)
+                    classes=[0],
                 )
 
                 img_annotated_pose = pose_results[0].plot()
@@ -144,9 +143,9 @@ def pose_estimation(
             cv2.destroyAllWindows()
 
         if save_img:
-            save_dir = Path("output_pose") / "exp"
+            save_dir = Path("output_pose_seg") / "exp"
             save_dir.mkdir(parents=True, exist_ok=True)
-            base_filename = Path(source).stem + "_pose"
+            base_filename = Path(source).stem + "_pose_seg"
             img_filename = Path(save_dir / base_filename).with_suffix(".jpg")
             unique_filename = increment_path(img_filename, exist_ok)
             cv2.imwrite(str(unique_filename), img_annotated)
@@ -192,7 +191,7 @@ def parse_opt():
     python pose_fusion_predict.py --pose_model yolov8l-pose.pt --seg_model yolov8l-seg.pt  --source video.mp4 --is_video --save-img --view-img
     python pose_fusion_predict.py --pose_model yolov8l-pose.pt --seg_model yolov8l-seg.pt  --source img.jpg --save-img --view-img
     python pose_fusion_predict.py --pose_model yolov8l-pose.pt --seg_model yolov8l-seg.pt  --source /folder --save-img
-    
+
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -231,8 +230,16 @@ def main(local_opt):
             exist_ok=local_opt.exist_ok,
         )
     elif local_opt.source == "0":  # if webcam
-        pose_model = YOLO(local_opt.pose_model) if isinstance(local_opt.pose_model, str) else local_opt.pose_model
-        seg_model = YOLO(local_opt.seg_model) if isinstance(local_opt.seg_model, str) else local_opt.seg_model
+        pose_model = (
+            YOLO(local_opt.pose_model)
+            if isinstance(local_opt.pose_model, str)
+            else local_opt.pose_model
+        )
+        seg_model = (
+            YOLO(local_opt.seg_model)
+            if isinstance(local_opt.seg_model, str)
+            else local_opt.seg_model
+        )
         pose_estimation(
             pose_model,
             seg_model,
@@ -243,7 +250,9 @@ def main(local_opt):
             exist_ok=local_opt.exist_ok,
         )
     elif os.path.isfile(local_opt.source):
-        pose_model = YOLO(local_opt.pose_model)  # Instantiate the model for a single file
+        pose_model = YOLO(
+            local_opt.pose_model
+        )  # Instantiate the model for a single file
         seg_model = YOLO(local_opt.seg_model)
         pose_estimation(
             pose_model,
@@ -264,4 +273,3 @@ def main(local_opt):
 if __name__ == "__main__":
     opt = parse_opt()
     main(opt)
-    
