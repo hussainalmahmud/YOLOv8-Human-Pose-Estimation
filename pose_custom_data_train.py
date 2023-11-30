@@ -9,22 +9,22 @@ def train(model_file, weights, dataset):
     # Train the model
     model.train(
         model=model,
-        data=dataset, # specify our own custom dataset if needed
+        data=dataset,  # specify our own custom dataset if needed
         epochs=10,
         patience=50,
         batch=16,
         imgsz=640,
         save=True,
-        device='cpu',
+        device="cpu",
         workers=8,
         pretrained=True,
-        optimizer='auto',
+        optimizer="auto",
         seed=0,
         resume=True,
         amp=True,
         fraction=1.0,
-        lr0=0.01, # initial learning rate (SGD=1E-2, Adam=1E-3)
-        lrf=0.01, 
+        lr0=0.01,  # initial learning rate (SGD=1E-2, Adam=1E-3)
+        lrf=0.01,
         momentum=0.937,
         weight_decay=0.0005,
         warmup_epochs=3.0,
@@ -36,23 +36,31 @@ def train(model_file, weights, dataset):
         mask_ratio=4,
         dropout=0.0,
         val=True,
-        plots=True
+        plots=True,
     )
 
 
-
 def parse_opt():
-    
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_file', type=str, default='yolov8l-pose.yaml', help='initial yaml file path')
-    parser.add_argument('--weights', type=str,default='yolov8l-pose.pt' , help='weights file path')
-    parser.add_argument('--dataset', type=str, default='coco8-pose.yaml', help='initial yaml file path')
-    opt = parser.parse_args()
-    return opt
+    parser.add_argument(
+        "--model_file",
+        type=str,
+        default="yolov8l-pose.yaml",
+        help="initial yaml file path",
+    )
+    parser.add_argument(
+        "--weights", type=str, default="yolov8l-pose.pt", help="weights file path"
+    )
+    parser.add_argument(
+        "--dataset", type=str, default="coco8-pose.yaml", help="initial yaml file path"
+    )
+    return parser.parse_args()
 
-def main(opt):
-    train(opt.model_file, opt.weights, opt.dataset)
-    
+
+def main(local_opt):
+    train(local_opt.model_file, local_opt.weights, local_opt.dataset)
+
+
 if __name__ == "__main__":
     opt = parse_opt()
     main(opt)

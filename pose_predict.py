@@ -6,6 +6,7 @@ from ultralytics import YOLO
 from pathlib import Path
 from ultralytics.utils.files import increment_path
 
+
 def pose_estimation(
     model, source, is_video=False, view_img=False, save_img=False, exist_ok=False
 ):
@@ -19,8 +20,8 @@ def pose_estimation(
         "imgsz": 640,
         "tracker": "bytetrack.yaml",
         # "persist": True,  # set persist to True for tracking in video (Re-Identification)
-        'augment': True,
-        'retina_masks': True,
+        "augment": True,
+        "retina_masks": True,
     }
 
     if is_video or source == 0:
@@ -104,7 +105,7 @@ def pose_estimation(
             image,
             **model_params,
         )
-        
+
         img_annotated = results[0].plot(boxes=True)
 
         if view_img:
@@ -120,7 +121,6 @@ def pose_estimation(
             unique_filename = increment_path(img_filename, exist_ok)
             cv2.imwrite(str(unique_filename), img_annotated)
             print(f"Saving image: {unique_filename}")  # Debug print
-
 
 
 def process_folder(model_path, folder_path, save_img=False, exist_ok=False):
@@ -164,34 +164,34 @@ def parse_opt():
     return parser.parse_args()
 
 
-def main(opt):
-    if os.path.isdir(opt.source):  # if folder
+def main(local_opt):
+    if os.path.isdir(local_opt.source):  # if folder
         process_folder(
-            opt.model, opt.source, save_img=opt.save_img, exist_ok=opt.exist_ok
+            local_opt.model, local_opt.source, save_img=local_opt.save_img, exist_ok=local_opt.exist_ok
         )
-    elif opt.source == "0":  # if webcam
-        model = YOLO(opt.model)
+    elif local_opt.source == "0":  # if webcam
+        model = YOLO(local_opt.model)
         pose_estimation(
             model,
-            int(opt.source),
-            is_video=opt.is_video,
-            view_img=opt.view_img,
-            save_img=opt.save_img,
-            exist_ok=opt.exist_ok,
+            int(local_opt.source),
+            is_video=local_opt.is_video,
+            view_img=local_opt.view_img,
+            save_img=local_opt.save_img,
+            exist_ok=local_opt.exist_ok,
         )
-    elif os.path.isfile(opt.source):  # if file
-        model = YOLO(opt.model) if isinstance(opt.model, str) else opt.model
+    elif os.path.isfile(local_opt.source):  # if file
+        model = YOLO(local_opt.model) if isinstance(local_opt.model, str) else local_opt.model
         pose_estimation(
             model,
-            opt.source,
-            is_video=opt.is_video,
-            view_img=opt.view_img,
-            save_img=opt.save_img,
-            exist_ok=opt.exist_ok,
+            local_opt.source,
+            is_video=local_opt.is_video,
+            view_img=local_opt.view_img,
+            save_img=local_opt.save_img,
+            exist_ok=local_opt.exist_ok,
         )
     else:
         raise FileNotFoundError(
-            f"Source '{opt.source}' does not exist as a file or directory."
+            f"Source '{local_opt.source}' does not exist as a file or directory."
         )
 
 
