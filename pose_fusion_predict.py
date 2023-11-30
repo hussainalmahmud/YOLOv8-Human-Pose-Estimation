@@ -1,10 +1,10 @@
 import cv2
+import os
 import argparse
 import numpy as np
 from ultralytics import YOLO
 from pathlib import Path
 from ultralytics.utils.files import increment_path
-import os
 
 
 def pose_estimation(
@@ -16,12 +16,11 @@ def pose_estimation(
     save_img=False,
     exist_ok=False,
 ):
-    # pose_model = YOLO('models/yolov8l-pose.pt')
-    # seg_model = YOLO('models/yolov8l-seg.pt')
 
-    if not Path(source).exists():  # Check sourcwqe path
+    if source != 0 and not Path(str(source)).exists():
         raise FileNotFoundError(f"Source path '{source}' does not exist.")
-    if is_video:
+        
+    if is_video or source == 0:
         # Video setup
         cap = cv2.VideoCapture(source)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -31,7 +30,10 @@ def pose_estimation(
         # Output setup
         save_dir = increment_path(Path("output") / "exp", exist_ok)
         save_dir.mkdir(parents=True, exist_ok=True)
-        output_path = str(save_dir / f"{Path(source).stem}.mp4")
+        output_filename = (
+            "webcam_output.mp4" if source == 0 else f"{Path(source).stem}.mp4"
+        )
+        output_path = str(save_dir / output_filename)
         video_writer = cv2.VideoWriter(
             output_path, fourcc, fps, (frame_width, frame_height)
         )
@@ -43,30 +45,37 @@ def pose_estimation(
             success, frame = cap.read()
 
             if success:
-                # Object detection and tracking
-                det_results = seg_model.track(
-                    frame,
-                    save=True,
-                    conf=0.25,
-                    iou=0.7,
-                    persist=True,
-                    device="cpu",
-                    classes=[0],
-                )
                 pose_results = pose_model.track(
-                    frame, save=True, conf=0.25, iou=0.7, persist=True, device="cpu"
+                    frame, 
+                    conf= 0.5,
+                    iou= 0.7,
+                    device= "cpu",
+                    imgsz= 640,
+                    tracker= "bytetrack.yaml",
+                    persist= True,  # set persist to True for tracking in video (Re-Identification)
+                    retina_masks= True,
+                )
+                seg_results = seg_model.track(
+                    frame,
+                    conf= 0.25,
+                    iou= 0.7,
+                    device= "cpu",
+                    imgsz= 640,
+                    tracker= "bytetrack.yaml",
+                    persist= True,  # set persist to True for tracking in video (Re-Identification)
+                    classes= [0],
                 )
 
-                img_annotated_det = det_results[0].plot()
                 img_annotated_pose = pose_results[0].plot()
+                img_annotated_seg = seg_results[0].plot()
                 alpha = 0.5  # Alpha controls the transparency: 0 is fully transparent, 1 is fully opaque
                 img_annotated = cv2.addWeighted(
-                    img_annotated_det, alpha, img_annotated_pose, 1 - alpha, 0
+                    img_annotated_seg, alpha, img_annotated_pose, 1 - alpha, 0
                 )
 
-                if det_results[0].boxes.id is not None:
-                    boxes = det_results[0].boxes.xyxy.cpu()
-                    track_ids = det_results[0].boxes.id.int().cpu().tolist()
+                if seg_results[0].boxes.id is not None:
+                    boxes = seg_results[0].boxes.xyxy.cpu()
+                    track_ids = seg_results[0].boxes.id.int().cpu().tolist()
 
                     for box, track_id in zip(boxes, track_ids):
                         bbox_center = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
@@ -107,25 +116,26 @@ def pose_estimation(
 
     else:
         image = cv2.imread(source)
-        det_results = seg_model.predict(
+        pose_results = pose_model.predict(
+            image,
+            conf=0.5,
+            iou=0.7,
+            device="cpu",
+            augment=True,
+            retina_masks=True,
+        )
+        seg_results = seg_model.predict(
             image,
             conf=0.25,
             iou=0.7,
             device="cpu",
             classes=[0],
         )
-        pose_results = pose_model.predict(
-            image,
-            conf=0.25,
-            iou=0.7,
-            #   save=True,
-            device="cpu",
-        )
-        img_annotated_det = det_results[0].plot()
+        img_annotated_seg = seg_results[0].plot()
         img_annotated_pose = pose_results[0].plot()
         alpha = 0.5  # Alpha controls the transparency: 0 is fully transparent, 1 is fully opaque
         img_annotated = cv2.addWeighted(
-            img_annotated_det, alpha, img_annotated_pose, 1 - alpha, 0
+            img_annotated_seg, alpha, img_annotated_pose, 1 - alpha, 0
         )
 
         if view_img:
@@ -175,7 +185,15 @@ def process_folder(
 
 
 def parse_opt():
-    """Parse command line arguments."""
+    """Parse command line arguments.
+
+    Example use:
+    python pose_fusion_predict.py --pose_model yolov8l-pose.pt --seg_model yolov8l-seg.pt --source 0 --view-img # webcam
+    python pose_fusion_predict.py --pose_model yolov8l-pose.pt --seg_model yolov8l-seg.pt  --source video.mp4 --is_video --save-img --view-img
+    python pose_fusion_predict.py --pose_model yolov8l-pose.pt --seg_model yolov8l-seg.pt  --source img.jpg --save-img --view-img
+    python pose_fusion_predict.py --pose_model yolov8l-pose.pt --seg_model yolov8l-seg.pt  --source /folder --save-img
+    
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--pose_model",
@@ -212,6 +230,18 @@ def main(local_opt):
             save_img=local_opt.save_img,
             exist_ok=local_opt.exist_ok,
         )
+    elif local_opt.source == "0":  # if webcam
+        pose_model = YOLO(local_opt.pose_model) if isinstance(local_opt.pose_model, str) else local_opt.pose_model
+        seg_model = YOLO(local_opt.seg_model) if isinstance(local_opt.seg_model, str) else local_opt.seg_model
+        pose_estimation(
+            pose_model,
+            seg_model,
+            int(local_opt.source),
+            is_video=local_opt.is_video,
+            view_img=local_opt.view_img,
+            save_img=local_opt.save_img,
+            exist_ok=local_opt.exist_ok,
+        )
     elif os.path.isfile(local_opt.source):
         pose_model = YOLO(local_opt.pose_model)  # Instantiate the model for a single file
         seg_model = YOLO(local_opt.seg_model)
@@ -234,3 +264,4 @@ def main(local_opt):
 if __name__ == "__main__":
     opt = parse_opt()
     main(opt)
+    

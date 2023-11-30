@@ -13,17 +13,6 @@ def pose_estimation(
     if source != 0 and not Path(str(source)).exists():
         raise FileNotFoundError(f"Source path '{source}' does not exist.")
 
-    model_params = {
-        "conf": 0.4,
-        "iou": 0.7,
-        "device": "cpu",
-        "imgsz": 640,
-        "tracker": "bytetrack.yaml",
-        # "persist": True,  # set persist to True for tracking in video (Re-Identification)
-        "augment": True,
-        "retina_masks": True,
-    }
-
     if is_video or source == 0:
         # Video setup
         cap = cv2.VideoCapture(source)
@@ -47,10 +36,16 @@ def pose_estimation(
             success, frame = cap.read()
 
             if success:
-                # sharped_frame = sharpen_image(frame)
                 results = model.track(
-                    frame,  # Object detection and tracking
-                    **model_params,
+                    frame,  
+                    conf= 0.5,
+                    iou= 0.7,
+                    device= "cpu",
+                    imgsz= 640,
+                    tracker= "bytetrack.yaml",
+                    persist= True,  # set persist to True for tracking in video (Re-Identification)
+                    retina_masks= True,
+                    augment= True,
                 )
 
                 img_annotated = results[0].plot(boxes=True)
@@ -103,7 +98,13 @@ def pose_estimation(
 
         results = model.predict(
             image,
-            **model_params,
+            conf= 0.5,
+            iou= 0.7,
+            device= "cpu",
+            imgsz= 640,
+            tracker= "bytetrack.yaml",
+            retina_masks= True,
+            augment= True,
         )
 
         img_annotated = results[0].plot(boxes=True)
@@ -134,14 +135,14 @@ def process_folder(model_path, folder_path, save_img=False, exist_ok=False):
 
 
 def parse_opt():
-    """ "
+    """ 
     Parse command line arguments.
 
     Example use:
-    python pose_predict.py --model yolov8l-pose.pt --source 0 --is_video --save-img # webcam
-    python pose_predict.py --model yolov8l-pose.pt --source video.mp4 --is_video --save-img
-    python pose_predict.py --model yolov8l-pose.pt --source img.jpg --save-img
-    python pose_predict.py --model yolov8l-pose.pt --source /folder --save-img
+    python pose_predict.py --model yolov8l-pose.pt --source 0 --is_video --view-img # webcam
+    python pose_predict.py --model yolov8l-pose.pt --source video.mp4 --is_video --save-img --view-img
+    python pose_predict.py --model yolov8l-pose.pt --source img_name.jpg --save-img --view-img
+    python pose_predict.py --model yolov8l-pose.pt --source folder_name --save-img 
 
     """
     parser = argparse.ArgumentParser()
