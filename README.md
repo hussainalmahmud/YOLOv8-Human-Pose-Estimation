@@ -16,11 +16,9 @@ make install
 
 ## Usage 🖥️
 
-The repository includes various scripts, each serving a specific purpose in the realm of pose detection with YOLOv8:
-
 ### 1. `pose_predict.py` 🤖
 
-- **Description**: Perform standard pose prediction using pre-trained YOLOv8 models.
+- **Description**: Perform standard pose prediction with object tracking and Re-Identification using pre-trained YOLOv8 models.
 - **Use Case**: Use this script to fine-tune the confidence threshold of pose detection for various input sources, including videos, images, or even real-time webcam feeds.
 #### **Example Command**:
 ```
@@ -36,12 +34,12 @@ python pose_predict.py --model yolov8l-pose.pt --source folder_name --save-img #
 
 ### 2. `pose_valid.py` 📊
 
-- Description: Automates the evaluation of the YOLOv8 pose model across multiple confidence thresholds to determine the most effective setting.
+- **Description**: Automates the evaluation of the YOLOv8 pose model across multiple confidence thresholds to determine the most effective setting.
 
-- Use Case: Essential for optimizing model accuracy by identifying the ideal confidence threshold through systematic testing and metric analysis.
+- **Use Case**: Essential for optimizing model accuracy by identifying the ideal confidence threshold through systematic testing and metric analysis.
 
 - **Features**:
-  - 🎚 **Automated Threshold Testing**: Runs the model validation over a series of confidence thresholds ranging from 0.05 to 0.9.
+  - 🎚 **Automated Threshold Testing**: Runs the model validation over a series of confidence thresholds.
   - 📈 **Performance Metrics Recording**: Collects and logs important metrics  like Precision (P), Recall (R), mean Average Precision (mAP), and F1 Score for each threshold inside a csv file.
 
 **Example Command**:
@@ -64,11 +62,11 @@ python pose_predict.py --model yolov8l-pose.pt --source folder_name --save-img #
 
 ### 4. `pose_custom_data_train.py` 🏋️‍♂️
 
-- **Description**: Fine-tune the YOLOv8 pose detection model on a custom dataset. This process involves retraining the pre-trained model with data that's more specific to your task, enhancing model specificity and accuracy.
+- **Description**: Fine-tune the YOLOv8 pose detection model on a custom dataset. This process involves retraining the pre-trained model with data that's more specific to the task, enhancing model specificity and accuracy.
 
 - **Use Case**: Optimal for scenarios requiring the model to adapt to unique environments or objects. Especially beneficial in improving detection precision and reducing false positives/negatives in challenging or borderline cases.
 
-**Note**: Utilizing tools like Intel's CVAT for keypoint annotation can significantly enhance the effectiveness of the training process on custom datasets.
+**Note**: Utilizing tools like Intel's CVAT for keypoint annotation.
 
 - **Example Command**:
   ```bash
@@ -77,11 +75,11 @@ python pose_predict.py --model yolov8l-pose.pt --source folder_name --save-img #
 
 ### 5. `pose_custom_data_tune.py` 🔧
 
-- **Description**: hyperparameter tuning of the YOLOv8 pose detection model using custom datasets. This script can help refines the model by adjusting specific parameters to align closely with the unique features of your data.
+- **Description**: hyperparameter tuning of the YOLOv8 pose detection model using custom datasets. This script can help refines the model by adjusting specific parameters to align closely with the unique features of the data.
 
 - **Use Case**: Ideal when seeking to enhance the precision and effectiveness of the YOLOv8 model for specific use cases, particularly where default settings might not yield optimal results.
 
-**Note**: This script is designed to optimize the model's learning process through tailored hyperparameter adjustments, ensuring a more accurate and efficient performance on your custom data.
+**Note**: This script is designed to optimize the model's learning process through tailored hyperparameter adjustments, ensuring a more accurate and efficient performance on the custom data.
 
 - **Example Command**:
   ```bash
